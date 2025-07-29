@@ -9,6 +9,8 @@ An Elixir library for AI-powered code modifications using Claude Opus 4 through 
 - 🔄 Conversation history for context-aware interactions
 - 📝 JSON-based operation format for reliable modifications
 - 🧪 Comprehensive test suite with unit and integration tests
+- ⚙️ Idempotent configuration management with ConfigAgent
+- 📜 Single-file scripts runnable via curl
 
 ## Installation
 
@@ -81,6 +83,47 @@ The agent maintains conversation history between calls:
   "How could we improve its performance?",
   []  # No need to re-specify files
 )
+```
+
+## ConfigAgent - Idempotent Configuration Management
+
+ConfigAgent specializes in ensuring configuration files match specifications, perfect for DevOps automation:
+
+```elixir
+spec = %{
+  instructions: "Set up Kubernetes deployment files",
+  templates: %{
+    "namespace" => "apiVersion: v1\nkind: Namespace\n..."
+  },
+  files: [
+    %{
+      path: "k8s/namespace.yaml",
+      description: "Kubernetes namespace for the application",
+      template: "namespace",  # Reference to template above
+      format: "yaml"
+    }
+  ]
+}
+
+# Ensure configuration matches spec (idempotent)
+{:ok, results} = CodeAgent.ConfigAgent.ensure_configuration(".", spec)
+
+# Check compliance without making changes
+compliance = CodeAgent.ConfigAgent.check_compliance(".", spec)
+```
+
+### Run Scripts via Curl
+
+Create single-file Elixir scripts that can be executed directly:
+
+```bash
+# Run Kubernetes setup script
+curl -sSL https://raw.githubusercontent.com/u2i/code_agent/main/examples/kubernetes_setup.exs | \
+  ANTHROPIC_API_KEY=your-key elixir - --app-name myapp --port 3000
+
+# Check compliance without changes
+curl -sSL https://raw.githubusercontent.com/u2i/code_agent/main/examples/kubernetes_setup.exs | \
+  ANTHROPIC_API_KEY=your-key elixir - --check
 ```
 
 ## Operation Format
